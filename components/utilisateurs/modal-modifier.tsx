@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
+
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,7 +23,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,9 +35,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-export function ModalModifier({ utilisateur }: { utilisateur: Utilisateur }) {
+type Props = {
+  utilisateur: Utilisateur | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+export function ModalModifier({ utilisateur, open, onOpenChange }: Props) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
 
   const {
     register,
@@ -45,38 +50,56 @@ export function ModalModifier({ utilisateur }: { utilisateur: Utilisateur }) {
     setValue,
     watch,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<ModifierUtilisateurInput>({
     resolver: zodResolver(modifierUtilisateurSchema),
-    defaultValues: {
-      nom: utilisateur.nom,
-      telephone: utilisateur.telephone ?? '',
-      role: utilisateur.role,
-      actif: utilisateur.actif,
-    },
+    defaultValues: utilisateur
+      ? {
+          nom: utilisateur.nom,
+          telephone: utilisateur.telephone ?? '',
+          role: utilisateur.role,
+          actif: utilisateur.actif,
+        }
+      : {
+          nom: '',
+          telephone: '',
+          role: 'vendeur',
+          actif: true,
+        },
   });
+
+  // Reset le formulaire quand l'utilisateur change
+  useEffect(() => {
+    if (utilisateur) {
+      reset({
+        nom: utilisateur.nom,
+        telephone: utilisateur.telephone ?? '',
+        role: utilisateur.role,
+        actif: utilisateur.actif,
+      });
+    }
+  }, [utilisateur, reset]);
 
   const role = watch('role');
   const actif = watch('actif');
 
   const onSubmit = async (data: ModifierUtilisateurInput) => {
+    if (!utilisateur) return;
+
     const res = await modifierUtilisateur(utilisateur.id, data);
     if (!res.success) {
       toast.error('Erreur', { description: res.error });
       return;
     }
     toast.success('Utilisateur modifié ✅');
-    setOpen(false);
+    onOpenChange(false);
     router.refresh();
   };
 
+  if (!utilisateur) return null;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5">
-          <Pencil className="h-3.5 w-3.5" />
-          Modifier
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -156,7 +179,7 @@ export function ModalModifier({ utilisateur }: { utilisateur: Utilisateur }) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
               Annuler
