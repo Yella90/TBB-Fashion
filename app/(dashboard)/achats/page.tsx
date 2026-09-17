@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/utils/format-currency';
 import { TableauAchats } from '@/components/achats/tableau-achats';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { Button } from '@/components/ui/button';
+import { Can } from '@/components/permissions/can';
 
 export const metadata = { title: 'Achats · TBB Fashion' };
 
@@ -26,12 +27,14 @@ export default async function AchatsPage() {
             Approvisionnements fournisseurs
           </p>
         </div>
+        <Can permission="achat:create">
         <Button asChild size="sm" className="gap-1.5 shrink-0">
           <Link href="/achats/nouvelle">
             <Plus className="h-4 w-4" />
             Nouvel achat
           </Link>
         </Button>
+        </Can>
       </div>
 
       <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-3">

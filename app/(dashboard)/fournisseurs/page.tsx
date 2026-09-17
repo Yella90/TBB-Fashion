@@ -9,6 +9,7 @@ import { formatCurrency } from '@/lib/utils/format-currency';
 import { TableauFournisseurs } from '@/components/fournisseurs/tableau-fournisseurs';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { Button } from '@/components/ui/button';
+import { Can } from '@/components/permissions/can';
 
 export const metadata = { title: 'Fournisseurs · TBB Fashion' };
 

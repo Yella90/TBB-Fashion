@@ -27,12 +27,14 @@ export default async function ProduitsPage() {
             GÃƒÂ©rez votre catalogue de chaussures
           </p>
         </div>
+        <Can permission="produit:create">
         <Button asChild size="sm" className="gap-1 sm:w-auto w-full">
           <Link href="/produits/nouveau">
             <Plus className="h-4 w-4" />
             Nouveau produit
           </Link>
         </Button>
+        </Can>
       </div>
 
       {/* Stats */}

@@ -1,3 +1,4 @@
+import React from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -136,9 +137,8 @@ export default function PermissionsPage() {
               </thead>
               <tbody>
                 {CATEGORIES_PERMISSIONS.map((cat) => (
-                  <>
+                  <React.Fragment key={cat.label}>
                     <tr
-                      key={cat.label}
                       className="bg-secondary/30 border-t"
                     >
                       <td
@@ -179,7 +179,7 @@ export default function PermissionsPage() {
                         })}
                       </tr>
                     ))}
-                  </>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

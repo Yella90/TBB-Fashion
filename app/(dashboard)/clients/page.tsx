@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/utils/format-currency';
 import { TableauClients } from '@/components/clients/tableau-clients';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { Button } from '@/components/ui/button';
+import { Can } from '@/components/permissions/can';
 
 export const metadata = { title: 'Clients · TBB Fashion' };
 

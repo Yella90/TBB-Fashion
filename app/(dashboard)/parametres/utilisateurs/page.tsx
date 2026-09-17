@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { ArrowLeft, Users, Shield, UserCheck, UserX, UserCog } from 'lucide-react';
+import { ArrowLeft, Users, Shield, UserCheck, UserCog } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 import {
   listerUtilisateurs,
@@ -14,10 +15,16 @@ import { Button } from '@/components/ui/button';
 export const metadata = { title: 'Utilisateurs · TBB Fashion' };
 
 export default async function ParametresUtilisateursPage() {
-  const [utilisateurs, stats, actuel] = await Promise.all([
+  const actuel = await getUtilisateurActuel();
+
+  // Rediriger si pas la permission
+  if (!actuel || (actuel.role !== 'admin' && actuel.role !== 'gerant')) {
+    redirect('/tableau-de-bord');
+  }
+
+  const [utilisateurs, stats] = await Promise.all([
     listerUtilisateurs(),
     getStatsUtilisateurs(),
-    getUtilisateurActuel(),
   ]);
 
   const isAdmin = actuel?.role === 'admin';
@@ -42,7 +49,7 @@ export default async function ParametresUtilisateursPage() {
               Utilisateurs
             </h1>
             <p className="text-xs lg:text-sm text-muted-foreground mt-0.5">
-              Gérez les comptes et les rôles de votre équipe
+              Gerez les comptes et les roles de votre equipe
             </p>
           </div>
         </div>
@@ -58,7 +65,6 @@ export default async function ParametresUtilisateursPage() {
         </div>
       )}
 
-      {/* Stats */}
       <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Total comptes"
@@ -70,10 +76,10 @@ export default async function ParametresUtilisateursPage() {
           label="Administrateurs"
           value={String(stats.admins)}
           icon={<Shield className="h-5 w-5" />}
-          description="accès complet"
+          description="acces complet"
         />
         <StatCard
-          label="Gérants"
+          label="Gerants"
           value={String(stats.gerants)}
           icon={<UserCog className="h-5 w-5" />}
           description="gestion"
@@ -86,7 +92,6 @@ export default async function ParametresUtilisateursPage() {
         />
       </div>
 
-      {/* Tableau */}
       <TableauUtilisateurs
         utilisateurs={utilisateurs}
         utilisateurActuelId={actuel?.id ?? null}
