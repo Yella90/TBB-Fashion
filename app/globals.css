@@ -1,26 +1,176 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:is(.dark *));
+
+/* Breakpoint custom */
+@theme {
+  --breakpoint-xs: 420px;
 }
 
+/* Mapping variables CSS → utilitaires Tailwind v4 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Palette TBB Fashion : rouge + noir + blanc */
+:root {
+  --radius: 0.75rem;
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(0 0% 7%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 7%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 7%);
+  --primary: hsl(0 72% 47%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 96%);
+  --secondary-foreground: hsl(0 0% 9%);
+  --muted: hsl(0 0% 96%);
+  --muted-foreground: hsl(0 0% 45%);
+  --accent: hsl(0 72% 47%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84% 42%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(0 0% 90%);
+  --input: hsl(0 0% 90%);
+  --ring: hsl(0 72% 47%);
+  --chart-1: hsl(0 72% 47%);
+  --chart-2: hsl(0 0% 9%);
+  --chart-3: hsl(0 60% 65%);
+  --chart-4: hsl(0 0% 45%);
+  --chart-5: hsl(0 40% 80%);
+}
+
+.dark {
+  --background: hsl(0 0% 4%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(0 0% 7%);
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(0 0% 7%);
+  --popover-foreground: hsl(0 0% 98%);
+  --primary: hsl(0 84% 55%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 12%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(0 0% 12%);
+  --muted-foreground: hsl(0 0% 65%);
+  --accent: hsl(0 84% 55%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84% 55%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(0 0% 15%);
+  --input: hsl(0 0% 15%);
+  --ring: hsl(0 84% 55%);
+  --chart-1: hsl(0 84% 55%);
+  --chart-2: hsl(0 0% 98%);
+  --chart-3: hsl(0 60% 70%);
+  --chart-4: hsl(0 0% 55%);
+  --chart-5: hsl(0 40% 80%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+  .gradient-tbb {
+    background: linear-gradient(135deg, hsl(0 72% 47%) 0%, hsl(0 72% 35%) 100%);
+  }
+}
+@layer base {
+  html, body {
+    overflow-x: hidden;
+  }
+}
+/* ============================================
+   Impression du ticket de vente
+   ============================================ */
+@media print {
+  /* Cacher tout sauf le ticket */
+  body * {
+    visibility: hidden;
+  }
+
+  #ticket-impression,
+  #ticket-impression * {
+    visibility: visible;
+  }
+
+  #ticket-impression {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Format 80mm */
+  .ticket-80mm {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    padding: 4mm !important;
+    font-size: 11px !important;
+    font-family: 'Courier New', monospace !important;
+  }
+
+  /* Format A4 */
+  .ticket-a4 {
+    width: 210mm !important;
+    max-width: 210mm !important;
+    padding: 15mm !important;
+    font-size: 13px !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  @page {
+    margin: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
 }
