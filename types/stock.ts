@@ -127,3 +127,30 @@ export const STATUT_STOCK_CONFIG: Record<
       'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border-0',
   },
 };
+// ============================================
+// Ligne complète pour l'export inventaire
+// ============================================
+export type LigneInventaire = {
+  variante_id: string;
+  pointure: number;
+  couleur: string;
+  sku: string | null;
+  prix_achat: number;
+  prix_vente: number;
+  produit: {
+    id: string;
+    nom: string;
+    marque: string | null;
+    reference: string;
+    description: string | null;
+    categorie: string;
+  } | null;
+  stock: {
+    quantite: number;
+    seuil_alerte: number;
+  } | null;
+  fournisseur: string | null;
+  total_vendu: number;
+  ca_vendu: number;
+  prix_pratiques: number[];
+};

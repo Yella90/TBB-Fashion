@@ -24,8 +24,7 @@ export async function creerVente(input: VenteInput) {
   const sousTotal = data.lignes.reduce((s, l) => s + l.sous_total, 0);
   const total = sousTotal - data.remise + data.tva;
 
-  // Le montant payé + avoir utilisé couvrent le total
-  const totalCouvert = data.montant_paye + data.avoir_utilise;
+  const totalCouvert = data.montant_paye + (data.avoir_utilise ?? 0);
   const reste = total - totalCouvert;
 
   let statut: 'payee' | 'partielle' | 'impayee' = 'payee';
@@ -34,30 +33,7 @@ export async function creerVente(input: VenteInput) {
 
   const pointsGagnes = data.client_id ? Math.floor(total / 1000) : 0;
 
-  // 1. Vérifier l'avoir si utilisé
-  if (data.avoir_utilise > 0) {
-    if (!data.client_id) {
-      return {
-        success: false,
-        error: 'Un client est requis pour utiliser un avoir.',
-      };
-    }
-
-    const { data: client } = await supabase
-      .from('clients')
-      .select('solde_avoir')
-      .eq('id', data.client_id)
-      .single();
-
-    if (!client || (client.solde_avoir ?? 0) < data.avoir_utilise) {
-      return {
-        success: false,
-        error: 'Solde d\'avoir insuffisant.',
-      };
-    }
-  }
-
-  // 2. Créer la vente via RPC
+  // La RPC gère tout : vente + stock + avoir + dette + fidélité
   const { data: venteId, error } = await supabase.rpc('creer_vente', {
     p_client_id: data.client_id || null,
     p_sous_total: sousTotal,
@@ -65,6 +41,7 @@ export async function creerVente(input: VenteInput) {
     p_tva: data.tva,
     p_total: total,
     p_montant_paye: data.montant_paye,
+    p_avoir_utilise: data.avoir_utilise ?? 0,
     p_mode_paiement: data.mode_paiement,
     p_statut: statut,
     p_points_fidelite: pointsGagnes,
@@ -83,29 +60,15 @@ export async function creerVente(input: VenteInput) {
     return { success: false, error: error.message };
   }
 
-  // 3. Déduire l'avoir si utilisé
-  if (data.avoir_utilise > 0 && data.client_id) {
-    const { error: errAvoir } = await supabase.rpc('utiliser_avoir', {
-      p_client_id: data.client_id,
-      p_montant: data.avoir_utilise,
-      p_vente_id: venteId,
-      p_description: 'Utilisation avoir vente',
-    });
-
-    if (errAvoir) {
-      console.error('Erreur deduction avoir:', errAvoir);
-    }
-  }
-
   revalidatePath('/ventes');
   revalidatePath('/produits');
   revalidatePath('/stock');
   revalidatePath('/tableau-de-bord');
   revalidatePath('/clients');
+  revalidatePath('/finances');
 
   return { success: true, venteId };
 }
-
 export async function annulerVente(venteId: string) {
   const supabase = await createClient();
 

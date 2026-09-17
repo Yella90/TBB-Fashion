@@ -342,11 +342,17 @@ export function ModalNouveauRetour({ venteId, clientId, lignes }: Props) {
                 </ul>
               </div>
 
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 flex items-center justify-between">
-                <span className="text-sm font-medium">Montant a rembourser</span>
-                <span className="text-lg font-bold text-primary">
-                  {formatCurrency(montantTotal)}
-                </span>
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Montant total retourne</span>
+                  <span className="text-lg font-bold text-primary">
+                    {formatCurrency(montantTotal)}
+                  </span>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Ce montant sera d&apos;abord deduit de la dette en cours (s&apos;il y en a).
+                  L&apos;excedent sera rembourse selon le type choisi.
+                </p>
               </div>
 
               {typeRemboursement === 'especes' && (

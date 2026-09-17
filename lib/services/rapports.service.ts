@@ -377,24 +377,89 @@ export async function getStatsStockGlobal() {
   };
 }
 
+// ============================================
+// Trésorerie globale — flux réels
+// Encaissements : ventes payées + autres revenus
+// Décaissements : achats payés + dépenses + remboursements
+// ============================================
 export async function getStatsFinancesGlobal(periode: PeriodeRapport) {
   const supabase = await createClient();
   const { debut, fin } = getDateRange(periode);
 
-  const { data: trans } = await supabase
+  // 1. Encaissements ventes (montant réellement payé)
+  const { data: ventes } = await supabase
+    .from('ventes')
+    .select('montant_paye, avoir_utilise')
+    .gte('date_vente', debut)
+    .lte('date_vente', fin)
+    .neq('statut', 'annulee');
+
+  const encaissementsVentes =
+    ventes?.reduce((s, v) => s + (v.montant_paye ?? 0), 0) ?? 0;
+
+  // 2. Autres revenus (transactions manuelles)
+  const { data: transRevenus } = await supabase
     .from('transactions_financieres')
-    .select('type, montant')
+    .select('montant')
+    .eq('type', 'revenu')
     .gte('date_transaction', debut)
     .lte('date_transaction', fin);
 
-  const revenus =
-    trans?.filter((t) => t.type === 'revenu').reduce((s, t) => s + t.montant, 0) ?? 0;
-  const depenses =
-    trans?.filter((t) => t.type === 'depense').reduce((s, t) => s + t.montant, 0) ?? 0;
+  const autresRevenus =
+    transRevenus?.reduce((s, t) => s + (t.montant ?? 0), 0) ?? 0;
+
+  const totalEntrees = encaissementsVentes + autresRevenus;
+
+  // 3. Achats payés au fournisseur
+  const { data: achats } = await supabase
+    .from('achats')
+    .select('montant_paye')
+    .gte('date_achat', debut.split('T')[0])
+    .lte('date_achat', fin.split('T')[0])
+    .neq('statut', 'annule');
+
+  const achatsPayes =
+    achats?.reduce((s, a) => s + (a.montant_paye ?? 0), 0) ?? 0;
+
+  // 4. Dépenses manuelles
+  const { data: transDepenses } = await supabase
+    .from('transactions_financieres')
+    .select('montant, categorie')
+    .eq('type', 'depense')
+    .gte('date_transaction', debut)
+    .lte('date_transaction', fin);
+
+  const depensesManuelles =
+    transDepenses?.reduce((s, t) => s + (t.montant ?? 0), 0) ?? 0;
+
+  // 5. Remboursements clients (retours espèces déjà dans transactions comme 'depense' catégorie 'Remboursement client')
+  const remboursements =
+    transDepenses
+      ?.filter((t) => t.categorie === 'Remboursement client')
+      .reduce((s, t) => s + (t.montant ?? 0), 0) ?? 0;
+
+  // Les "dépenses manuelles" incluent les remboursements → on isole les vraies charges
+  const chargesExploitation = depensesManuelles - remboursements;
+
+  const totalSorties = achatsPayes + depensesManuelles;
+
+  const solde = totalEntrees - totalSorties;
 
   return {
-    revenus,
-    depenses,
-    solde: revenus - depenses,
+    // Entrées
+    encaissementsVentes,
+    autresRevenus,
+    totalEntrees,
+    // Sorties
+    achatsPayes,
+    chargesExploitation,
+    remboursements,
+    depensesManuelles,
+    totalSorties,
+    // Solde
+    solde,
+    // Compatibilité (ancien format)
+    revenus: totalEntrees,
+    depenses: totalSorties,
   };
 }

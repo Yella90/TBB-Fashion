@@ -9,6 +9,10 @@ import {
   XCircle,
   BarChart3,
   Info,
+  ArrowUpRight,
+  ArrowDownRight,
+  Gift,
+  Truck,
 } from 'lucide-react';
 
 import {
@@ -58,7 +62,6 @@ export default async function RapportsPage({
   const params = await searchParams;
   const parametres = await getParametresBoutique();
 
-  // Période : URL > config > 'mois'
   const periodeDefaut =
     (parametres?.finance_periode_defaut as PeriodeRapport) ?? 'mois';
 
@@ -91,6 +94,8 @@ export default async function RapportsPage({
     getStatsStockGlobal(),
     getStatsFinancesGlobal(periode),
   ]);
+
+  const soldePositif = statsFinances.solde >= 0;
 
   return (
     <div className="space-y-5 lg:space-y-6">
@@ -165,9 +170,138 @@ export default async function RapportsPage({
         <TopClients clients={topClients} />
       </div>
 
-      {/* Résumé stock + finances */}
+      {/* Trésorerie détaillée + Stock */}
       <div className="grid gap-3 sm:gap-4 lg:grid-cols-3">
+        {/* Trésorerie — nouvelle version complète */}
         <Card className="lg:col-span-2">
+          <CardHeader className="pb-3 border-b">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-primary" />
+              Trésorerie
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Flux réels de la période (encaissements − décaissements)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x">
+              {/* ENCAISSEMENTS */}
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                  <ArrowUpRight className="h-4 w-4 text-emerald-500" />
+                  <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                    Encaissements
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      Ventes payées
+                    </span>
+                    <span className="font-medium">
+                      {formatCurrency(statsFinances.encaissementsVentes)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      Autres revenus
+                    </span>
+                    <span className="font-medium">
+                      {formatCurrency(statsFinances.autresRevenus)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t pt-2">
+                  <span className="text-xs font-semibold">Total entrées</span>
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    + {formatCurrency(statsFinances.totalEntrees)}
+                  </span>
+                </div>
+              </div>
+
+              {/* DÉCAISSEMENTS */}
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                  <ArrowDownRight className="h-4 w-4 text-red-500" />
+                  <span className="text-sm font-semibold text-red-600 dark:text-red-400">
+                    Décaissements
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <Truck className="h-3 w-3" />
+                      Achats payés
+                    </span>
+                    <span className="font-medium">
+                      {formatCurrency(statsFinances.achatsPayes)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      Charges d&apos;exploitation
+                    </span>
+                    <span className="font-medium">
+                      {formatCurrency(statsFinances.chargesExploitation)}
+                    </span>
+                  </div>
+                  {statsFinances.remboursements > 0 && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <Gift className="h-3 w-3" />
+                        Remboursements
+                      </span>
+                      <span className="font-medium">
+                        {formatCurrency(statsFinances.remboursements)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between border-t pt-2">
+                  <span className="text-xs font-semibold">Total sorties</span>
+                  <span className="text-sm font-bold text-red-600 dark:text-red-400">
+                    − {formatCurrency(statsFinances.totalSorties)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Solde net */}
+            <div className="border-t p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet
+                    className={`h-4 w-4 ${
+                      soldePositif
+                        ? 'text-emerald-500'
+                        : 'text-red-500'
+                    }`}
+                  />
+                  <span className="text-sm font-semibold">
+                    Solde de trésorerie
+                  </span>
+                </div>
+                <span
+                  className={`text-xl font-bold ${
+                    soldePositif
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-red-600 dark:text-red-400'
+                  }`}
+                >
+                  {soldePositif ? '+' : ''}
+                  {formatCurrency(statsFinances.solde)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Stock */}
+        <Card>
           <CardHeader className="pb-3 border-b">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Package className="h-4 w-4 text-primary" />
@@ -177,99 +311,46 @@ export default async function RapportsPage({
               Vue globale de l&apos;inventaire
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg border p-4">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Package className="h-4 w-4" />
-                  <span className="text-xs font-medium">Paires en stock</span>
-                </div>
-                <p className="text-2xl font-bold mt-2">
-                  {statsStock.totalPaires.toLocaleString('fr-FR')}
-                </p>
+          <CardContent className="pt-4 space-y-3">
+            <div className="rounded-lg border p-3">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Package className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium">Paires en stock</span>
               </div>
+              <p className="text-xl font-bold mt-1">
+                {statsStock.totalPaires.toLocaleString('fr-FR')}
+              </p>
+            </div>
 
-              <div className="rounded-lg border p-4">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <DollarSign className="h-4 w-4" />
-                  <span className="text-xs font-medium">Valeur stock</span>
-                </div>
-                <p className="text-2xl font-bold mt-2">
-                  {formatCurrency(statsStock.valeurStock, { compact: true })}
-                </p>
+            <div className="rounded-lg border p-3">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <DollarSign className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium">Valeur stock</span>
               </div>
+              <p className="text-xl font-bold mt-1">
+                {formatCurrency(statsStock.valeurStock, { compact: true })}
+              </p>
+            </div>
 
-              <div className="rounded-lg border p-4 border-amber-200 dark:border-amber-900">
-                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="text-xs font-medium">Stock faible</span>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg border p-3 border-amber-200 dark:border-amber-900">
+                <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                  <AlertTriangle className="h-3 w-3" />
+                  <span className="text-[10px] font-medium">Faible</span>
                 </div>
-                <p className="text-2xl font-bold mt-2 text-amber-600 dark:text-amber-400">
+                <p className="text-lg font-bold mt-1 text-amber-600 dark:text-amber-400">
                   {statsStock.enAlerte}
                 </p>
               </div>
 
-              <div className="rounded-lg border p-4 border-red-200 dark:border-red-900">
-                <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                  <XCircle className="h-4 w-4" />
-                  <span className="text-xs font-medium">Ruptures</span>
+              <div className="rounded-lg border p-3 border-red-200 dark:border-red-900">
+                <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                  <XCircle className="h-3 w-3" />
+                  <span className="text-[10px] font-medium">Rupture</span>
                 </div>
-                <p className="text-2xl font-bold mt-2 text-red-600 dark:text-red-400">
+                <p className="text-lg font-bold mt-1 text-red-600 dark:text-red-400">
                   {statsStock.enRupture}
                 </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3 border-b">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-primary" />
-              Trésorerie
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Revenus et dépenses manuels
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-4 space-y-4">
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <TrendingUp className="h-3 w-3 text-emerald-500" />
-                  Revenus
-                </span>
-                <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                  {formatCurrency(statsFinances.revenus, { compact: true })}
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <TrendingDown className="h-3 w-3 text-red-500" />
-                  Dépenses
-                </span>
-                <span className="text-sm font-semibold text-red-600 dark:text-red-400">
-                  {formatCurrency(statsFinances.depenses, { compact: true })}
-                </span>
-              </div>
-            </div>
-
-            <div className="border-t pt-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Solde</span>
-                <span
-                  className={`text-base font-bold ${
-                    statsFinances.solde >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-600 dark:text-red-400'
-                  }`}
-                >
-                  {statsFinances.solde >= 0 ? '+' : ''}
-                  {formatCurrency(statsFinances.solde, { compact: true })}
-                </span>
               </div>
             </div>
           </CardContent>

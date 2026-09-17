@@ -9,9 +9,15 @@ import {
   ListFilter,
 } from 'lucide-react';
 
-import { listerStock, getStatsStock } from '@/lib/services/stock.service';
+import {
+  listerStock,
+  getStatsStock,
+  getInventaireComplet,
+} from '@/lib/services/stock.service';
+import { getParametresBoutique } from '@/lib/services/parametres.service';
 import { formatCurrency } from '@/lib/utils/format-currency';
 import { TableauStock } from '@/components/stock/tableau-stock';
+import { ExportInventaire } from '@/components/stock/export-inventaire';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,9 +31,11 @@ import {
 export const metadata = { title: 'Stock · TBB Fashion' };
 
 export default async function StockPage() {
-  const [variantes, stats] = await Promise.all([
+  const [variantes, stats, inventaire, parametres] = await Promise.all([
     listerStock({ limite: 500 }),
     getStatsStock(),
+    getInventaireComplet(),
+    getParametresBoutique(),
   ]);
 
   return (
@@ -55,12 +63,13 @@ export default async function StockPage() {
               Alertes
             </Link>
           </Button>
-          <Button size="sm" asChild className="gap-1.5">
+          <Button variant="outline" size="sm" asChild className="gap-1.5">
             <Link href="/stock/inventaire">
               <Package className="h-4 w-4" />
               Inventaire
             </Link>
           </Button>
+          <ExportInventaire lignes={inventaire} parametres={parametres} />
         </div>
       </div>
 
