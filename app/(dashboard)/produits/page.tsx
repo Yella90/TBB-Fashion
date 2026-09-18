@@ -3,10 +3,9 @@ import { Package, Plus, TrendingUp, AlertTriangle } from 'lucide-react';
 import { listerProduits } from '@/lib/services/produits.service';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/dashboard/stat-card';
-import { Can } from '@/components/permissions/can';
 import { TableauProduits } from '@/components/produits/tableau-produits';
 
-export const metadata = { title: 'Produits Ã‚Â· TBB Fashion' };
+export const metadata = { title: 'Produits · TBB Fashion' };
 
 export default async function ProduitsPage() {
   const produits = await listerProduits({ actifSeulement: false });
@@ -17,28 +16,26 @@ export default async function ProduitsPage() {
 
   return (
     <div className="space-y-6">
-      {/* En-tÃƒÂªte */}
+      {/* En-tête */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
             Produits
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            GÃƒÂ©rez votre catalogue de chaussures
+          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+            Gérez votre catalogue de chaussures
           </p>
         </div>
-        <Can permission="produit:create">
-        <Button asChild size="sm" className="gap-1 sm:w-auto w-full">
+        <Button asChild size="sm" className="gap-1.5 sm:w-auto w-full">
           <Link href="/produits/nouveau">
             <Plus className="h-4 w-4" />
             Nouveau produit
           </Link>
         </Button>
-        </Can>
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
         <StatCard
           label="Total produits"
           value={String(produits.length)}
@@ -52,10 +49,10 @@ export default async function ProduitsPage() {
           description={`${inactifs} inactifs`}
         />
         <StatCard
-          label="CatÃƒÂ©gories"
+          label="Catégories"
           value={String(categories)}
           icon={<AlertTriangle className="h-5 w-5" />}
-          description="Homme, Femme, EnfantÃ¢â‚¬Â¦"
+          description="Homme, Femme, Enfant…"
         />
       </div>
 
@@ -69,7 +66,7 @@ export default async function ProduitsPage() {
             Aucun produit pour le moment
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Commencez par ajouter votre premier modÃƒÂ¨le de chaussures.
+            Commencez par ajouter votre premier modèle de chaussures.
           </p>
           <Button asChild className="mt-4 gap-1">
             <Link href="/produits/nouveau">
